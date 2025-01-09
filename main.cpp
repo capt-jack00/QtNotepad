@@ -8,7 +8,9 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QString>
-#include <fstream>
+#include <QFile>
+#include <QFileDialog>
+#include <QTextStream>
 
 using namespace std;
 
@@ -38,11 +40,20 @@ int main(int argc, char **argv){
 
     QObject::connect(saveAction, &QAction::triggered, [&]() {
         QMessageBox fileSavedSucces;
-        QString savedText = textEdit.toPlainText();
-        std::fstream file("example.txt");
-        //file << savedText;
-        fileSavedSucces.setText("File saved!");
-        fileSavedSucces.exec();
+        QString fileName = QFileDialog::getSaveFileName(&mainWindow, "Save file", "", "Text files (*.txt);;All files(*)");
+        if(!fileName.isEmpty()){
+            QFile file(fileName);
+
+            if(file.isOpen()){
+                QTextStream out(&file);
+                out << textEdit.toPlainText();
+                file.close();
+            }
+        }
+
+
+        // fileSavedSucces.setText("File saved!");
+        // fileSavedSucces.exec();
     });
 
     QObject::connect(saveAsAction, &QAction::triggered, [&]() {
@@ -51,19 +62,16 @@ int main(int argc, char **argv){
         fileSavedSucces.exec();
     });
 
+    // TODO: Redesign saving file method (Save, Save as buttons)
+
     QObject::connect(openAction, &QAction::triggered, [&]() {
 
 
     });
 
     QObject::connect(exitAction, &QAction::triggered, [&]() {
-
-
+        app.exit();
     });
-
-
-
-
 
     mainWindow.show();
     return app.exec();
