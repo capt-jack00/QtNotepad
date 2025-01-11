@@ -1,4 +1,4 @@
-//#include <iostream>
+#include <iostream>
 #include <QMainWindow>
 #include <QWidget>
 #include <QApplication>
@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QTextStream>
+#include <QFileInfo>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ int main(int argc, char **argv){
     QHBoxLayout layout;
     QMenuBar *menuBar = mainWindow.menuBar();
     QMenu *fileMenu = menuBar->addMenu("File");
+    QString globalFileName;
 
     QTextEdit textEdit;
 
@@ -39,8 +41,19 @@ int main(int argc, char **argv){
     mainWindow.resize(800, 800);
 
     QObject::connect(saveAction, &QAction::triggered, [&]() {
+        //QFileInfo fileInfo(globalFileName);
+        QFile filePath = globalFileName;
+        if(filePath.open(QIODevice::WriteOnly | QIODevice::Text)){
+            QTextStream out(&filePath);
+            out << textEdit.toPlainText();
+            filePath.close();
+        }
+        else{
+            cout << "something went wrong";
+        }
 
     });
+    //TODO: Open button needs fixing
 
     QObject::connect(saveAsAction, &QAction::triggered, [&]() {
         QMessageBox fileSavedStatus;
@@ -61,11 +74,26 @@ int main(int argc, char **argv){
         }
 
         fileSavedStatus.exec();
+        fileName = globalFileName;
     });
 
     QObject::connect(openAction, &QAction::triggered, [&]() {
+        QMessageBox fileOpenedStatus;
         QString fileName = QFileDialog::getOpenFileName(&mainWindow, "Open file", "", "Text files (*.txt);;All files(*)");
+        if(!fileName.isEmpty()){
+            QFile file(fileName);
 
+            if(file.open(QIODevice::ReadOnly)){
+                QTextStream in(&file);
+                QString fileContent = in.readAll();
+                textEdit.setPlainText(fileContent);
+            }
+            else{
+                fileOpenedStatus.setText("Something went wrong!");
+                fileOpenedStatus.exec();
+            }
+        }
+        fileName = globalFileName;
 
     });
 
