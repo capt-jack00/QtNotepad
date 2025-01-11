@@ -39,32 +39,32 @@ int main(int argc, char **argv){
     mainWindow.resize(800, 800);
 
     QObject::connect(saveAction, &QAction::triggered, [&]() {
-        QMessageBox fileSavedSucces;
+
+    });
+
+    QObject::connect(saveAsAction, &QAction::triggered, [&]() {
+        QMessageBox fileSavedStatus;
         QString fileName = QFileDialog::getSaveFileName(&mainWindow, "Save file", "", "Text files (*.txt);;All files(*)");
         if(!fileName.isEmpty()){
             QFile file(fileName);
 
-            if(file.isOpen()){
+            if(file.open(QIODevice::WriteOnly | QIODevice::Text)){
                 QTextStream out(&file);
                 out << textEdit.toPlainText();
                 file.close();
+
+                fileSavedStatus.setText("Saved successfully!");
+            }
+            else{
+                fileSavedStatus.setText("Something went wrong!");
             }
         }
 
-
-        // fileSavedSucces.setText("File saved!");
-        // fileSavedSucces.exec();
+        fileSavedStatus.exec();
     });
-
-    QObject::connect(saveAsAction, &QAction::triggered, [&]() {
-        QMessageBox fileSavedSucces;
-        fileSavedSucces.setText("File saved!");
-        fileSavedSucces.exec();
-    });
-
-    // TODO: Redesign saving file method (Save, Save as buttons)
 
     QObject::connect(openAction, &QAction::triggered, [&]() {
+        QString fileName = QFileDialog::getOpenFileName(&mainWindow, "Open file", "", "Text files (*.txt);;All files(*)");
 
 
     });
